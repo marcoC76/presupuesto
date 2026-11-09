@@ -1,0 +1,937 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="color-scheme" content="dark" />
+<link rel="icon" href="data:," />
+<title>Presupuesto Solo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+<style>
+  :root{
+    --bg:#0c1210;
+    --bg2:#101714;
+    --card:#151d19;
+    --card2:#1a231e;
+    --line:#26312a;
+    --line-soft:#1e2822;
+    --ink:#e8efe9;
+    --ink2:#a7b5ab;
+    --ink3:#71816f;
+    --green:#3ecf7a;
+    --green-dim:#1d3a28;
+    --amber:#f0b64a;
+    --red:#f26d6d;
+    --blue:#5db4e8;
+    --radius:14px;
+  }
+  *{box-sizing:border-box}
+  html{-webkit-text-size-adjust:100%}
+  body{
+    margin:0;background:var(--bg);color:var(--ink);
+    font-family:"Manrope",system-ui,-apple-system,sans-serif;
+    font-size:15px;line-height:1.45;
+    padding-bottom:48px;
+  }
+  .mono{font-family:"IBM Plex Mono",ui-monospace,monospace}
+  .wrap{max-width:1060px;margin:0 auto;padding:0 16px}
+  h1,h2,h3{margin:0;line-height:1.2}
+  button{font-family:inherit;cursor:pointer}
+  input,select,textarea{font-family:inherit}
+
+  /* ---------- Hero quincena ---------- */
+  .hero{
+    margin-top:18px;background:linear-gradient(160deg,#16241b 0%,var(--card) 55%);
+    border:1px solid var(--line);border-radius:20px;padding:20px;
+  }
+  .hero-top{display:flex;flex-wrap:wrap;gap:12px;align-items:flex-start;justify-content:space-between}
+  .hero .periodo{font-size:13px;color:var(--ink2);font-weight:600;letter-spacing:.02em}
+  .hero .periodo strong{color:var(--green);font-size:15px}
+  .hero .queda-label{font-size:13px;color:var(--ink2);margin-top:14px}
+  .hero .queda{font-size:44px;font-weight:800;letter-spacing:-.02em;line-height:1.05}
+  .hero .queda.neg{color:var(--red)}
+  .hero .queda-sub{font-size:13px;color:var(--ink2);margin-top:4px}
+  .bar{height:10px;background:#0a0f0c;border:1px solid var(--line-soft);border-radius:99px;overflow:hidden;margin-top:14px}
+  .bar > i{display:block;height:100%;background:var(--green);border-radius:99px;transition:width .3s ease}
+  .bar.warn > i{background:var(--amber)}
+  .bar.over > i{background:var(--red)}
+  .hero-nums{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:16px}
+  @media(min-width:640px){.hero-nums{grid-template-columns:repeat(4,1fr)}}
+  .hnum{background:rgba(0,0,0,.25);border:1px solid var(--line-soft);border-radius:12px;padding:10px 12px}
+  .hnum .k{font-size:11.5px;color:var(--ink3);font-weight:700;text-transform:uppercase;letter-spacing:.06em}
+  .hnum .v{font-size:19px;font-weight:700;margin-top:2px}
+  .hnum .v small{font-size:12px;color:var(--ink2);font-weight:600}
+
+  .seg{display:inline-flex;background:#0a0f0c;border:1px solid var(--line);border-radius:99px;padding:3px;gap:2px}
+  .seg button{border:0;background:transparent;color:var(--ink2);font-weight:700;font-size:13px;padding:6px 14px;border-radius:99px}
+  .seg button.on{background:var(--green-dim);color:var(--green)}
+  .timing-note{
+    display:none;margin-top:12px;background:rgba(240,182,74,.09);border:1px solid rgba(240,182,74,.28);
+    border-radius:12px;padding:10px 12px;font-size:13px;color:var(--ink2);line-height:1.5;
+  }
+  .timing-note b{color:var(--amber)}
+  .proximos{margin-top:18px;border-top:1px solid var(--line-soft);padding-top:14px}
+  .prox-head{display:flex;align-items:baseline;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:6px}
+  .prox-head .t{font-size:13px;font-weight:800;color:var(--ink);text-transform:uppercase;letter-spacing:.06em}
+  .prox-head .s{font-size:12px;color:var(--ink3);font-weight:600}
+  .pay-row{display:flex;gap:12px;align-items:flex-start;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--line-soft)}
+  .pay-row:last-child{border-bottom:0;padding-bottom:2px}
+  .pay-main{min-width:0}
+  .pay-name{font-weight:800;font-size:14.5px}
+  .pay-date{font-size:13px;color:var(--ink2);margin-top:1px}
+  .pay-paid-note{font-size:12.5px;color:var(--green);font-weight:700;margin-top:3px}
+  .pay-side{text-align:right;flex:none}
+  .pay-amt{font-weight:800;font-size:15px}
+  .pay-status{font-size:12px;font-weight:700;margin-top:2px;color:var(--amber)}
+  .pay-status.today{color:var(--red)}
+  .pay-status.paid{color:var(--green)}
+
+  /* ---------- Secciones ---------- */
+  section{margin-top:30px}
+  .sec-head{display:flex;align-items:baseline;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:12px}
+  .sec-head h2{font-size:19px;font-weight:800}
+  .sec-head p{margin:0;color:var(--ink2);font-size:13px}
+
+  .grid2{display:grid;grid-template-columns:1fr;gap:16px}
+  @media(min-width:860px){.grid2{grid-template-columns:1fr 1fr}}
+
+  .card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:16px}
+  .card h3{font-size:14px;font-weight:800;color:var(--ink);margin-bottom:10px}
+  .card h3 .tag{float:right;font-size:11px;color:var(--ink3);font-weight:700}
+
+  /* ---------- Presupuesto ---------- */
+  .cat{padding:10px 0;border-bottom:1px solid var(--line-soft)}
+  .cat:last-child{border-bottom:0}
+  .cat-row{display:flex;justify-content:space-between;gap:10px;align-items:baseline}
+  .cat-name{font-weight:700;font-size:14.5px}
+  .cat-det{font-size:12px;color:var(--ink3);font-weight:600}
+  .cat-nums{font-size:13px;color:var(--ink2);white-space:nowrap}
+  .cat-nums b{color:var(--ink);font-size:14px}
+  .cat-bar{height:6px;background:#0a0f0c;border-radius:99px;overflow:hidden;margin-top:7px}
+  .cat-bar > i{display:block;height:100%;background:var(--green);border-radius:99px}
+  .cat-bar.warn > i{background:var(--amber)}
+  .cat-bar.over > i{background:var(--red)}
+  .cat-foot{display:flex;justify-content:space-between;font-size:12px;color:var(--ink3);margin-top:5px;font-weight:600}
+  .cat-foot .rest{color:var(--ink2)}
+  .cat-foot .rest.neg{color:var(--red)}
+  .tot-row{display:flex;justify-content:space-between;padding-top:12px;margin-top:4px;border-top:1px solid var(--line);font-weight:800}
+  .tot-row .mono{font-size:16px}
+
+  /* ---------- Formulario ---------- */
+  .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .form-grid .full{grid-column:1/-1}
+  label.f{display:block;font-size:12px;font-weight:700;color:var(--ink2);margin-bottom:5px;text-transform:uppercase;letter-spacing:.05em}
+  .field{
+    width:100%;background:#0a0f0c;border:1px solid var(--line);border-radius:10px;
+    color:var(--ink);padding:11px 12px;font-size:15px;outline:none;
+  }
+  .field:focus{border-color:var(--green)}
+  select.field{appearance:none}
+  .tipo-toggle{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+  .tipo-toggle button{
+    border:1px solid var(--line);background:#0a0f0c;color:var(--ink2);
+    border-radius:10px;padding:11px;font-weight:800;font-size:14px;
+  }
+  .tipo-toggle button.on-gasto{border-color:var(--red);color:var(--red);background:rgba(242,109,109,.08)}
+  .tipo-toggle button.on-extra{border-color:var(--green);color:var(--green);background:rgba(62,207,122,.08)}
+  .btn{
+    border:0;border-radius:12px;padding:13px 18px;font-weight:800;font-size:15px;
+    background:var(--green);color:#08130c;width:100%;
+  }
+  .btn:active{transform:translateY(1px)}
+  .btn.ghost{background:transparent;border:1px solid var(--line);color:var(--ink);width:auto;padding:10px 16px;font-size:13.5px}
+  .btn.small{width:auto;padding:9px 14px;font-size:13px;border-radius:10px}
+  .btn.blue{background:var(--blue);color:#08131c}
+  .msg{font-size:13px;margin-top:10px;min-height:18px;font-weight:600}
+  .msg.ok{color:var(--green)} .msg.err{color:var(--red)} .msg.info{color:var(--ink2)}
+
+  /* ---------- Movimientos ---------- */
+  .mov{display:flex;gap:12px;padding:11px 0;border-bottom:1px solid var(--line-soft);align-items:flex-start}
+  .mov:last-child{border-bottom:0}
+  .mov .dot{width:9px;height:9px;border-radius:99px;margin-top:6px;flex:none}
+  .mov .dot.gasto{background:var(--red)} .mov .dot.extra{background:var(--green)}
+  .mov .main{flex:1;min-width:0}
+  .mov .t{font-weight:700;font-size:14.5px}
+  .mov .s{font-size:12.5px;color:var(--ink3);font-weight:600}
+  .mov .amt{font-weight:700;font-size:15px;white-space:nowrap}
+  .mov .amt.neg{color:var(--red)} .mov .amt.pos{color:var(--green)}
+  .mov .del{border:0;background:transparent;color:var(--ink3);font-size:16px;padding:2px 4px;line-height:1}
+  .badge{font-size:10.5px;font-weight:800;padding:2px 7px;border-radius:99px;letter-spacing:.03em}
+  .badge.pend{background:rgba(240,182,74,.15);color:var(--amber)}
+  .badge.sync{background:rgba(62,207,122,.12);color:var(--green)}
+  .empty{color:var(--ink3);font-size:14px;padding:14px 0;text-align:center}
+
+  /* ---------- Patrimonio ---------- */
+  .pat-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .pat{background:var(--card2);border:1px solid var(--line-soft);border-radius:12px;padding:12px}
+  .pat .k{font-size:11.5px;color:var(--ink3);font-weight:700;text-transform:uppercase;letter-spacing:.06em}
+  .pat .v{font-size:21px;font-weight:800;margin-top:3px}
+  .pat .s{font-size:12px;color:var(--ink2);margin-top:2px}
+  .proj{margin-top:14px}
+  .proj-row{display:grid;grid-template-columns:118px 1fr 86px;gap:10px;align-items:center;margin-top:8px;font-size:12.5px}
+  .proj-row .lbl{color:var(--ink2);font-weight:700}
+  .proj-row .track{height:12px;background:#0a0f0c;border-radius:99px;overflow:hidden}
+  .proj-row .track > i{display:block;height:100%;background:var(--green);opacity:.55}
+  .proj-row:first-of-type .track > i{opacity:1}
+  .proj-row .val{text-align:right;font-weight:700}
+
+  /* ---------- Conexión ---------- */
+  .steps{margin:0;padding-left:20px;color:var(--ink2);font-size:14px}
+  .steps li{margin-bottom:7px}
+  .steps b{color:var(--ink)}
+  .conn-state{display:flex;align-items:center;gap:8px;font-weight:700;font-size:14px}
+  .conn-state .dot{width:10px;height:10px;border-radius:99px;background:var(--ink3)}
+  .conn-state.on .dot{background:var(--green)}
+  .conn-btns{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+  details.codebox{margin-top:14px}
+  details.codebox summary{cursor:pointer;font-weight:800;font-size:14px;color:var(--blue);padding:6px 0}
+  pre{
+    background:#070a08;border:1px solid var(--line);border-radius:12px;padding:14px;
+    overflow-x:auto;font-size:12px;line-height:1.5;color:#cfe3d4;
+    font-family:"IBM Plex Mono",ui-monospace,monospace;max-height:420px;overflow-y:auto;
+    white-space:pre;
+  }
+  .note{font-size:12.5px;color:var(--ink3);margin-top:10px}
+  footer{margin-top:36px;color:var(--ink3);font-size:12.5px;text-align:center}
+  @media (prefers-reduced-motion: reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- ============ PANEL / QUINCENA ============ -->
+  <div class="hero">
+    <div class="hero-top">
+      <div class="periodo" id="periodoLabel">Quincena actual</div>
+      <div class="seg" role="group" aria-label="Vista por periodo">
+        <button id="segQ" class="on" type="button">Quincena</button>
+        <button id="segM" type="button">Mes</button>
+      </div>
+    </div>
+    <div class="queda-label" id="quedaLabel">Te queda por gastar en esta quincena</div>
+    <div class="queda mono" id="quedaVal">$0</div>
+    <div class="queda-sub" id="quedaSub"></div>
+    <div class="bar" id="quedaBar"><i style="width:0%"></i></div>
+    <div class="hero-nums">
+      <div class="hnum"><div class="k">Ingreso</div><div class="v mono" id="hIngreso">$0</div></div>
+      <div class="hnum"><div class="k">Gastado real</div><div class="v mono" id="hGastado">$0</div></div>
+      <div class="hnum"><div class="k">Planeado</div><div class="v mono" id="hPlaneado">$0</div></div>
+      <div class="hnum"><div class="k">Apartado ahorro</div><div class="v mono" id="hApartado">$0</div></div>
+    </div>
+    <div class="timing-note" id="rentaTimingNote" role="note"></div>
+    <div class="proximos" aria-label="Próximos pagos">
+      <div class="prox-head"><span class="t">Próximos pagos</span><span class="s">Renta el día 3 · Internet del 15 al 17</span></div>
+      <div id="proxList"></div>
+    </div>
+  </div>
+
+  <!-- ============ REGISTRAR + MOVIMIENTOS ============ -->
+  <section>
+    <div class="grid2">
+      <div class="card">
+        <h3>Registrar movimiento</h3>
+        <div class="tipo-toggle" style="margin-bottom:12px">
+          <button type="button" id="tipoGasto" class="on-gasto">− Gasto</button>
+          <button type="button" id="tipoExtra">+ Ingreso extra</button>
+        </div>
+        <div class="form-grid">
+          <div>
+            <label class="f" for="fMonto">Monto</label>
+            <input class="field mono" id="fMonto" type="number" inputmode="decimal" min="0" step="1" placeholder="0" />
+          </div>
+          <div>
+            <label class="f" for="fFecha">Fecha</label>
+            <input class="field" id="fFecha" type="date" />
+          </div>
+          <div class="full">
+            <label class="f" for="fCat">Categoría</label>
+            <select class="field" id="fCat"></select>
+          </div>
+          <div class="full" id="metodoWrap" style="display:none">
+            <label class="f" for="fMetodo">Cómo te pagaron</label>
+            <select class="field" id="fMetodo">
+              <option>Efectivo</option><option>Transferencia</option><option>Tarjeta</option><option>Otro</option>
+            </select>
+          </div>
+          <div class="full">
+            <label class="f" for="fNota">Nota (opcional)</label>
+            <input class="field" id="fNota" type="text" placeholder="Ej. Súper de la semana, laptop de un cliente…" />
+          </div>
+        </div>
+        <div style="margin-top:14px"><button class="btn" id="btnAdd" type="button">Agregar gasto</button></div>
+        <div class="msg info" id="addMsg"></div>
+      </div>
+
+      <div class="card">
+        <h3>Movimientos de este periodo <span class="tag" id="movCount"></span></h3>
+        <div id="movList"><div class="empty">Todavía no registras nada en este periodo.<br/>Agrega tu primer gasto o ingreso extra.</div></div>
+        <div class="note" id="movNote"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ PRESUPUESTO ============ -->
+  <section>
+    <div class="sec-head">
+      <h2>Presupuesto</h2>
+      <p id="presSub">Planeado vs. gastado real, por categoría</p>
+    </div>
+    <div class="grid2">
+      <div class="card">
+        <h3>Gastos <span class="tag" id="tagGastos"></span></h3>
+        <div id="listaGastos"></div>
+        <div class="tot-row"><span>Total gastos</span><span class="mono" id="totGastos"></span></div>
+      </div>
+      <div class="card">
+        <h3>Asignaciones <span class="tag">de la sobra</span></h3>
+        <div id="listaAsig"></div>
+        <div class="tot-row"><span>Total asignado</span><span class="mono" id="totAsig"></span></div>
+        <div class="note">El colchón de $700/mes ($350 por quincena) no se toca por gusto: si el mes cierra sin imprevistos, se va a Casa / CETES.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ PATRIMONIO ============ -->
+  <section>
+    <div class="sec-head">
+      <h2>Patrimonio</h2>
+      <p>Sin deudas registradas</p>
+    </div>
+    <div class="card">
+      <div class="pat-grid">
+        <div class="pat"><div class="k">CETES</div><div class="v mono">$70,000</div><div class="s">Inversión que sí genera</div></div>
+        <div class="pat"><div class="k">Efectivo</div><div class="v mono">$280,000</div><div class="s">Líquido, sin rendimiento</div></div>
+        <div class="pat"><div class="k">Patrimonio total</div><div class="v mono" style="color:var(--green)">$350,000</div><div class="s">Activos − deudas ($0)</div></div>
+        <div class="pat"><div class="k">Cobertura</div><div class="v mono">37.4 meses</div><div class="s">De gastos cubiertos · emergencia de 6 meses = $56,100</div></div>
+      </div>
+      <div class="proj">
+        <h3 style="margin-bottom:2px">Proyección con el apartado a la casa</h3>
+        <div class="proj-row"><span class="lbl">Hoy</span><div class="track"><i style="width:90%"></i></div><span class="val mono">$350,000</span></div>
+        <div class="proj-row"><span class="lbl">En 12 meses</span><div class="track"><i style="width:97.4%"></i></div><span class="val mono">$378,800</span></div>
+        <div class="proj-row"><span class="lbl">12 m. sin tocar el colchón</span><div class="track"><i style="width:99.6%"></i></div><span class="val mono">$387,200</span></div>
+        <div class="note">Con $2,400/mes garantizados a Casa / CETES. Si el colchón de $700 no se usa ningún mes, el apartado sube a $3,100/mes. Sin contar rendimientos de CETES.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ CONEXIÓN GOOGLE SHEETS ============ -->
+  <section>
+    <div class="sec-head">
+      <h2>Conexión con tu hoja de Google</h2>
+      <p>La app escribe en tus hojas Presupuesto, Movimientos e Ingresos Extra</p>
+    </div>
+    <div class="card">
+      <div class="conn-state" id="connState"><span class="dot"></span><span id="connStateTxt">Sin conectar — la app funciona con tus números cargados</span></div>
+      <div style="margin-top:14px">
+        <label class="f" for="fUrl">URL de tu Web App de Apps Script</label>
+        <input class="field mono" id="fUrl" type="url" placeholder="https://script.google.com/macros/s/AKfyc…/exec" />
+        <div class="note">La URL se usa solo mientras la app está abierta; no se guarda en ningún servidor.</div>
+      </div>
+      <div class="conn-btns">
+        <button class="btn small" id="btnTest" type="button">Probar conexión</button>
+        <button class="btn small blue" id="btnPull" type="button">Traer movimientos de la hoja</button>
+        <button class="btn small blue" id="btnPush" type="button">Enviar pendientes a la hoja</button>
+        <button class="btn ghost" id="btnCsv" type="button">Descargar movimientos (CSV)</button>
+      </div>
+      <div class="msg info" id="connMsg"></div>
+
+      <h3 style="margin-top:22px">Para conectar, una sola vez:</h3>
+      <ol class="steps">
+        <li>Abre tu hoja de presupuesto y entra a <b>Extensiones → Apps Script</b>.</li>
+        <li>Crea un archivo nuevo (o pega al final de tu <b>Code.gs</b>) el <b>código puente</b> de abajo y guarda.</li>
+        <li>Arriba a la derecha: <b>Implementar → Nueva implementación → Aplicación web</b>. Ejecutar como: <b>Yo</b>. Acceso: <b>Cualquier persona</b>.</li>
+        <li>Copia la URL que termina en <b>/exec</b> y pégala aquí arriba. Dale <b>Probar conexión</b>.</li>
+        <li>Desde ese momento, cada gasto o ingreso extra que registres se envía solo a tu hoja, y con <b>Traer movimientos</b> ves en la app lo que ya tenías capturado en Sheets.</li>
+      </ol>
+
+      <details class="codebox">
+        <summary>Código puente para Apps Script (clic para ver y copiar)</summary>
+        <div style="margin:10px 0"><button class="btn ghost" id="btnCopyCode" type="button">Copiar código</button> <span class="msg info" id="copyMsg" style="display:inline"></span></div>
+        <pre id="bridgeCode">// ===== PUENTE PRESUPUESTO SOLO =====
+// Pégalo en el mismo proyecto de Apps Script de tu hoja
+// (Extensiones &gt; Apps Script) y publícalo como Aplicación web.
+
+function doGet() {
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var p = ss.getSheetByName('Presupuesto');
+  var mov = ss.getSheetByName('Movimientos');
+  var filas = [];
+  if (mov &amp;&amp; mov.getLastRow() &gt; 3) {
+    filas = mov.getRange(4, 1, mov.getLastRow() - 3, 5).getValues();
+  }
+  var movimientos = [];
+  for (var i = 0; i &lt; filas.length; i++) {
+    var r = filas[i];
+    if (!r[0]) continue;
+    movimientos.push({
+      fecha: Utilities.formatDate(new Date(r[0]), Session.getScriptTimeZone(), 'yyyy-MM-dd'),
+      tipo: String(r[1] || 'Gasto'),
+      categoria: String(r[2] || 'Otro'),
+      monto: Number(r[3] || 0),
+      nota: String(r[4] || '')
+    });
+  }
+  return ContentService
+    .createTextOutput(JSON.stringify({
+      ok: true,
+      ingresoQuincenal: p.getRange('B3').getValue(),
+      ingresoMensual: p.getRange('B4').getValue(),
+      totalGastos: p.getRange('E20').getValue(),
+      totalAsignado: p.getRange('E27').getValue(),
+      patrimonio: p.getRange('B41').getValue(),
+      movimientos: movimientos
+    }))
+    .setMimeType(ContentService.MimeType.JSON);
+}
+
+function doPost(e) {
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var d = JSON.parse(e.postData.contents);
+  var fecha = new Date(d.fecha + 'T12:00:00');
+  if (d.tipo === 'Ingreso extra') {
+    var h = ss.getSheetByName('Ingresos Extra');
+    h.appendRow([fecha, d.nota || d.categoria, d.categoria, d.monto, d.metodo || 'Efectivo', 'Desde la app']);
+  } else {
+    var m = ss.getSheetByName('Movimientos');
+    m.appendRow([fecha, 'Gasto', d.categoria, d.monto, d.nota || '']);
+  }
+  return ContentService
+    .createTextOutput(JSON.stringify({ ok: true }))
+    .setMimeType(ContentService.MimeType.JSON);
+}</pre>
+      </details>
+    </div>
+  </section>
+
+  <footer>Presupuesto Solo · Ingreso neto $13,400/mes · Gastos $9,350 · Sobra $4,050 · Regla del colchón: lo que no se usa, a fin de mes se va a la casa.</footer>
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  /* ================= Datos de tu presupuesto (versión final holgada) ================= */
+  var INGRESO_QUINCENAL = 6700;
+  var GASTOS = [
+    { nombre:"Renta", mensual:5400, detalle:"Pago día 3 de cada mes" },
+    { nombre:"Internet", mensual:500, detalle:"Pago 15–17 de cada mes" },
+    { nombre:"Gas (tanque $400)", mensual:133, detalle:"$400 trimestral" },
+    { nombre:"Luz ($200 bimestral)", mensual:100, detalle:"$200 bimestral" },
+    { nombre:"Agua (garrafón $35)", mensual:150, detalle:"$35 cada 7 días" },
+    { nombre:"Basura ($10)", mensual:60, detalle:"$10 cada 5 días" },
+    { nombre:"Comida en casa", mensual:800, detalle:"Mensual" },
+    { nombre:"Súper", mensual:800, detalle:"Mensual" },
+    { nombre:"Pasajes ($36 x 4 días)", mensual:624, detalle:"$144 semanal" },
+    { nombre:"Comida CETIS ($50 x 2 días)", mensual:433, detalle:"$100 semanal · mié y jue" },
+    { nombre:"Celular", mensual:200, detalle:"Mensual" },
+    { nombre:"Limpieza", mensual:150, detalle:"Mensual · jabón y líquidos" }
+  ];
+  var ASIGNACIONES = [
+    { nombre:"Casa / CETES", mensual:2400, detalle:"Meta: casa propia" },
+    { nombre:"Colchón imprevistos", mensual:700, detalle:"$350 por quincena" },
+    { nombre:"Ocio", mensual:500, detalle:"Mensual" },
+    { nombre:"Fondo gato", mensual:450, detalle:"Adopción en ~2 meses" }
+  ];
+  var CATS_EXTRA = ["Reparación de computadoras","Instalación de programas","Venta","Página web","Otro"];
+
+  var TOTAL_GASTOS_MES = GASTOS.reduce(function(s,c){return s+c.mensual;},0);      // 9350
+  var TOTAL_ASIG_MES   = ASIGNACIONES.reduce(function(s,c){return s+c.mensual;},0); // 4050
+
+  /* ================= Estado (solo en esta sesión) ================= */
+  var state = {
+    vista: "quincena",           // "quincena" | "mes"
+    tipo: "Gasto",               // tipo del formulario
+    movimientos: [],             // {id, fecha:'yyyy-mm-dd', tipo, categoria, monto, nota, metodo, synced}
+    url: "",
+    conectado: false,
+    seq: 1
+  };
+
+  /* ================= Utilidades ================= */
+  function $(id){ return document.getElementById(id); }
+  function fmt(n){ return "$" + Math.round(n).toLocaleString("es-MX"); }
+  function pad(n){ return (n<10?"0":"")+n; }
+  function hoyStr(){ var d=new Date(); return d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate()); }
+  function parseFecha(s){ var p=s.split("-"); return new Date(+p[0], +p[1]-1, +p[2]); }
+  var MESES = ["enero","febrero","marzo","abril","mayo","junio","julio","agosto","septiembre","octubre","noviembre","diciembre"];
+
+  function periodoActual(){
+    var ahora = new Date();
+    if (state.vista === "mes"){
+      var iniM = new Date(ahora.getFullYear(), ahora.getMonth(), 1);
+      var finM = new Date(ahora.getFullYear(), ahora.getMonth()+1, 0);
+      return { ini:iniM, fin:finM, factor:1,
+        nombre:"Mes de " + MESES[ahora.getMonth()] + " " + ahora.getFullYear(),
+        rango: "1 al " + finM.getDate() + " de " + MESES[ahora.getMonth()] };
+    }
+    var dia = ahora.getDate();
+    var ini, fin, q;
+    if (dia <= 15){ ini = new Date(ahora.getFullYear(), ahora.getMonth(), 1); fin = new Date(ahora.getFullYear(), ahora.getMonth(), 15); q = "1ª quincena"; }
+    else { ini = new Date(ahora.getFullYear(), ahora.getMonth(), 16); fin = new Date(ahora.getFullYear(), ahora.getMonth()+1, 0); q = "2ª quincena"; }
+    return { ini:ini, fin:fin, factor:0.5,
+      nombre:q + " de " + MESES[ahora.getMonth()] + " " + ahora.getFullYear(),
+      rango: ini.getDate() + " al " + fin.getDate() + " de " + MESES[ahora.getMonth()] };
+  }
+  function enPeriodo(fechaStr, per){
+    var f = parseFecha(fechaStr);
+    var ini = new Date(per.ini.getFullYear(), per.ini.getMonth(), per.ini.getDate());
+    var fin = new Date(per.fin.getFullYear(), per.fin.getMonth(), per.fin.getDate());
+    return f >= ini && f <= fin;
+  }
+  function gastadoPor(categoria, per){
+    var s = 0;
+    state.movimientos.forEach(function(m){
+      if (m.tipo === "Gasto" && m.categoria === categoria && enPeriodo(m.fecha, per)) s += m.monto;
+    });
+    return s;
+  }
+  function extrasEn(per){
+    var s = 0;
+    state.movimientos.forEach(function(m){
+      if (m.tipo === "Ingreso extra" && enPeriodo(m.fecha, per)) s += m.monto;
+    });
+    return s;
+  }
+  function gastosEn(per){
+    var s = 0;
+    state.movimientos.forEach(function(m){
+      if (m.tipo === "Gasto" && enPeriodo(m.fecha, per)) s += m.monto;
+    });
+    return s;
+  }
+
+  function planDe(cat, per){ return Math.round(cat.mensual * per.factor); }
+  /* Planes del periodo con redondeo repartido: la suma de las categorías
+     siempre cuadra con el total exacto (sin diferencias de $1). */
+  function planesPeriodo(lista, per){
+    var exactos = lista.map(function(c){ return c.mensual * per.factor; });
+    var total = Math.round(exactos.reduce(function(s,n){ return s+n; }, 0));
+    var planes = exactos.map(function(n){ return Math.floor(n); });
+    var resto = total - planes.reduce(function(s,n){ return s+n; }, 0);
+    var orden = exactos.map(function(n,i){ return { i:i, frac:n - Math.floor(n) }; })
+      .sort(function(a,b){ return b.frac - a.frac; });
+    for (var k = 0; k < resto && k < orden.length; k++) planes[orden[k].i]++;
+    var mapa = {};
+    lista.forEach(function(c,i){ mapa[c.nombre] = planes[i]; });
+    return { mapa: mapa, total: total };
+  }
+  function totalPlan(lista, per){
+    return lista.reduce(function(s,c){ return s + planDe(c, per); }, 0);
+  }
+
+  /* ================= Próximos pagos (fechas fijas) =================
+     Renta: día 3 de cada mes · Internet: ventana del 15 al 17 de cada mes.
+     Todo se calcula contra la fecha de hoy del navegador, sin fechas quemadas. */
+  function montoDe(nombre){
+    for (var i = 0; i < GASTOS.length; i++) if (GASTOS[i].nombre === nombre) return GASTOS[i].mensual;
+    return 0;
+  }
+  function inicioDia(d){ return new Date(d.getFullYear(), d.getMonth(), d.getDate()); }
+  function diasEntre(desde, hasta){ return Math.round((inicioDia(hasta) - inicioDia(desde)) / 86400000); }
+  function fechaTxt(d){
+    var t = d.getDate() + " de " + MESES[d.getMonth()];
+    if (d.getFullYear() !== new Date().getFullYear()) t += " de " + d.getFullYear();
+    return t;
+  }
+  function textoFaltan(n){
+    if (n === 0) return "Hoy";
+    if (n === 1) return "Falta 1 día";
+    return "Faltan " + n + " días";
+  }
+  /* Primer movimiento Gasto de la categoría dentro de [ini, fin].
+     iniExclusivo=true deja fuera el propio día inicial (para no confundir
+     el pago del día 3 anterior con el del próximo día 3). */
+  function buscarPago(categoria, ini, fin, iniExclusivo){
+    var hallado = null;
+    state.movimientos.forEach(function(mv){
+      if (mv.tipo !== "Gasto" || mv.categoria !== categoria) return;
+      var f = parseFecha(mv.fecha);
+      var okIni = iniExclusivo ? f > inicioDia(ini) : f >= inicioDia(ini);
+      if (okIni && f <= inicioDia(fin)){
+        if (!hallado || f < parseFecha(hallado.fecha)) hallado = mv;
+      }
+    });
+    return hallado;
+  }
+  function infoRenta(hoy){
+    var y = hoy.getFullYear(), m = hoy.getMonth(), dia = hoy.getDate();
+    var siguiente = dia <= 3 ? new Date(y, m, 3) : new Date(y, m + 1, 3);
+    var anterior = new Date(siguiente.getFullYear(), siguiente.getMonth() - 1, 3);
+    /* Periodo de esa renta: del día 3 anterior al próximo día 3 (sin incluir
+       el día 3 anterior, que fue el pago de la renta pasada). */
+    var pagoSiguiente = buscarPago("Renta", anterior, siguiente, true);
+    /* Pago del ciclo en curso: la renta de este mes, si hoy ya pasó el día 3. */
+    var pagoCiclo = null, debidoCiclo = null;
+    if (dia >= 3){
+      debidoCiclo = new Date(y, m, 3);
+      var finCiclo = new Date(y, m + 1, 3);
+      state.movimientos.forEach(function(mv){
+        if (mv.tipo !== "Gasto" || mv.categoria !== "Renta") return;
+        var f = parseFecha(mv.fecha);
+        if (f >= inicioDia(debidoCiclo) && f < inicioDia(finCiclo)){
+          if (!pagoCiclo || f < parseFecha(pagoCiclo.fecha)) pagoCiclo = mv;
+        }
+      });
+    }
+    return { siguiente:siguiente, anterior:anterior, pagoSiguiente:pagoSiguiente, pagoCiclo:pagoCiclo, debidoCiclo:debidoCiclo };
+  }
+  function infoInternet(hoy){
+    var y = hoy.getFullYear(), m = hoy.getMonth(), dia = hoy.getDate();
+    var ini, fin;
+    if (dia <= 17){ ini = new Date(y, m, 15); fin = new Date(y, m, 17); }
+    else { ini = new Date(y, m + 1, 15); fin = new Date(y, m + 1, 17); }
+    /* Pagado si el movimiento cayó en la ventana 15–17 de esa instancia;
+       como respaldo, cualquier pago de Internet dentro del mismo mes de la instancia. */
+    var pago = buscarPago("Internet", ini, fin, false);
+    if (!pago){
+      state.movimientos.forEach(function(mv){
+        if (mv.tipo !== "Gasto" || mv.categoria !== "Internet") return;
+        var f = parseFecha(mv.fecha);
+        if (f.getFullYear() === ini.getFullYear() && f.getMonth() === ini.getMonth()){
+          if (!pago || f < parseFecha(pago.fecha)) pago = mv;
+        }
+      });
+    }
+    return { ini:ini, fin:fin, pago:pago };
+  }
+  function renderProximos(){
+    var hoy = new Date();
+    var r = infoRenta(hoy);
+    var rentaHtml;
+    if (r.pagoSiguiente){
+      var fp = parseFecha(r.pagoSiguiente.fecha);
+      rentaHtml = '<div class="pay-row"><div class="pay-main"><div class="pay-name">Renta</div>' +
+        '<div class="pay-date">' + fechaTxt(r.siguiente) + ' · día 3 de cada mes</div></div>' +
+        '<div class="pay-side"><div class="pay-amt mono">' + fmt(montoDe("Renta")) + '</div>' +
+        '<div class="pay-status paid">✓ Pagado el ' + fechaTxt(fp) + '</div></div></div>';
+    } else {
+      var faltanR = diasEntre(hoy, r.siguiente);
+      var notaCiclo = "";
+      if (r.pagoCiclo && !(r.debidoCiclo && r.debidoCiclo.getTime() === r.siguiente.getTime())){
+        notaCiclo = '<div class="pay-paid-note">✓ Renta de ' + MESES[r.debidoCiclo.getMonth()] + ' pagada el ' + fechaTxt(parseFecha(r.pagoCiclo.fecha)) + '</div>';
+      }
+      rentaHtml = '<div class="pay-row"><div class="pay-main"><div class="pay-name">Renta</div>' +
+        '<div class="pay-date">' + fechaTxt(r.siguiente) + ' · día 3 de cada mes</div>' + notaCiclo + '</div>' +
+        '<div class="pay-side"><div class="pay-amt mono">' + fmt(montoDe("Renta")) + '</div>' +
+        '<div class="pay-status' + (faltanR === 0 ? ' today' : '') + '">' + (faltanR === 0 ? 'Hoy toca pagar' : textoFaltan(faltanR)) + '</div></div></div>';
+    }
+
+    var it = infoInternet(hoy);
+    var internetHtml;
+    var rangoTxt = it.ini.getDate() + "–" + it.fin.getDate() + " de " + MESES[it.ini.getMonth()] +
+      (it.ini.getFullYear() !== hoy.getFullYear() ? " de " + it.ini.getFullYear() : "");
+    if (it.pago){
+      internetHtml = '<div class="pay-row"><div class="pay-main"><div class="pay-name">Internet</div>' +
+        '<div class="pay-date">' + rangoTxt + ' · ventana 15–17 de cada mes</div></div>' +
+        '<div class="pay-side"><div class="pay-amt mono">' + fmt(montoDe("Internet")) + '</div>' +
+        '<div class="pay-status paid">✓ Pagado el ' + fechaTxt(parseFecha(it.pago.fecha)) + '</div></div></div>';
+    } else {
+      var enCurso = inicioDia(hoy) >= inicioDia(it.ini) && inicioDia(hoy) <= inicioDia(it.fin);
+      var estadoIt, clsIt = "";
+      if (enCurso){ estadoIt = "En curso · cierra el " + fechaTxt(it.fin); }
+      else {
+        var faltanI = diasEntre(hoy, it.ini);
+        estadoIt = faltanI === 0 ? "Hoy toca pagar" : textoFaltan(faltanI);
+        if (faltanI === 0) clsIt = " today";
+      }
+      internetHtml = '<div class="pay-row"><div class="pay-main"><div class="pay-name">Internet</div>' +
+        '<div class="pay-date">' + rangoTxt + ' · ventana 15–17 de cada mes</div></div>' +
+        '<div class="pay-side"><div class="pay-amt mono">' + fmt(montoDe("Internet")) + '</div>' +
+        '<div class="pay-status' + clsIt + '">' + estadoIt + '</div></div></div>';
+    }
+    $("proxList").innerHTML = rentaHtml + internetHtml;
+  }
+  function renderRentaTiming(per){
+    var el = $("rentaTimingNote");
+    if (state.vista !== "quincena"){ el.style.display = "none"; el.textContent = ""; return; }
+    var mov = null;
+    state.movimientos.forEach(function(mv){
+      if (mv.tipo === "Gasto" && mv.categoria === "Renta" && enPeriodo(mv.fecha, per)){
+        if (!mov || mv.fecha < mov.fecha) mov = mv;
+      }
+    });
+    if (!mov){ el.style.display = "none"; el.textContent = ""; return; }
+    var f = parseFecha(mov.fecha);
+    var apartadoQ = Math.round(montoDe("Renta") / 2);
+    el.innerHTML = "<b>Renta pagada:</b> la renta de " + fmt(mov.monto) + " se pagó el " +
+      f.getDate() + " de " + MESES[f.getMonth()] + " — se cubre con su apartado (" + fmt(apartadoQ) +
+      " × 2 quincenas). Si en esta quincena la categoría se ve en rojo, es esperado por el momento del pago (timing), no un gasto de más: en el mes completo sí cuadra.";
+    el.style.display = "block";
+  }
+
+  /* ================= Render ================= */
+  function render(){
+    var per = periodoActual();
+    var ingreso = INGRESO_QUINCENAL * (state.vista === "mes" ? 2 : 1) + extrasEn(per);
+    var pg = planesPeriodo(GASTOS, per), pa = planesPeriodo(ASIGNACIONES, per);
+    var planeado = pg.total;
+    var apartado = pa.total;
+    var gastado = gastosEn(per);
+    var queda = ingreso - gastado - apartado;
+    var pct = ingreso > 0 ? Math.min(100, Math.round((gastado + apartado) / ingreso * 100)) : 0;
+
+    $("periodoLabel").innerHTML = "<strong>" + per.nombre + "</strong> · " + per.rango;
+    $("quedaLabel").textContent = state.vista === "mes" ? "Te queda por gastar este mes" : "Te queda por gastar en esta quincena";
+    var qv = $("quedaVal");
+    qv.textContent = fmt(queda);
+    qv.className = "queda mono" + (queda < 0 ? " neg" : "");
+    $("quedaSub").textContent = "Ingreso " + fmt(ingreso) + " − gastado real " + fmt(gastado) + " − apartado de ahorro " + fmt(apartado) + " · comprometido el " + pct + "% de tu ingreso (gasto + apartado)";
+    var bar = $("quedaBar");
+    bar.querySelector("i").style.width = pct + "%";
+    bar.className = "bar" + (pct >= 100 ? " over" : (pct >= 80 ? " warn" : ""));
+    $("hIngreso").textContent = fmt(ingreso);
+    $("hGastado").textContent = fmt(gastado);
+    $("hPlaneado").textContent = fmt(planeado);
+    $("hApartado").textContent = fmt(apartado);
+
+    renderRentaTiming(per);
+    renderProximos();
+    renderCats(per, pg, pa);
+    renderMovs(per);
+  }
+
+  function catHTML(cat, per, plan){
+    var real = gastadoPor(cat.nombre, per);
+    var pct = plan > 0 ? Math.round(real / plan * 100) : 0;
+    var w = Math.min(100, pct);
+    var cls = pct > 100 ? " over" : (pct >= 80 ? " warn" : "");
+    var rest = plan - real;
+    return '<div class="cat">' +
+      '<div class="cat-row"><div><span class="cat-name">' + cat.nombre + '</span> <span class="cat-det">' + cat.detalle + '</span></div>' +
+      '<div class="cat-nums mono"><b>' + fmt(real) + '</b> / ' + fmt(plan) + '</div></div>' +
+      '<div class="cat-bar' + cls + '"><i style="width:' + w + '%"></i></div>' +
+      '<div class="cat-foot"><span>' + pct + '% usado</span><span class="rest' + (rest < 0 ? ' neg' : '') + '">' +
+        (rest < 0 ? 'Te pasaste ' + fmt(-rest) : 'Quedan ' + fmt(rest)) + '</span></div></div>';
+  }
+  function asigHTML(cat, per, plan){
+    return '<div class="cat"><div class="cat-row"><div><span class="cat-name">' + cat.nombre + '</span> <span class="cat-det">' + cat.detalle + '</span></div>' +
+      '<div class="cat-nums mono"><b>' + fmt(plan) + '</b></div></div></div>';
+  }
+  function renderCats(per, pg, pa){
+    $("listaGastos").innerHTML = GASTOS.map(function(c){ return catHTML(c, per, pg.mapa[c.nombre]); }).join("");
+    $("listaAsig").innerHTML = ASIGNACIONES.map(function(c){ return asigHTML(c, per, pa.mapa[c.nombre]); }).join("");
+    $("totGastos").textContent = fmt(pg.total);
+    $("totAsig").textContent = fmt(pa.total);
+    $("tagGastos").textContent = state.vista === "mes" ? "por mes" : "por quincena";
+  }
+
+  function renderMovs(per){
+    var lista = state.movimientos.filter(function(m){ return enPeriodo(m.fecha, per); })
+      .slice().sort(function(a,b){ return a.fecha < b.fecha ? 1 : (a.fecha > b.fecha ? -1 : b.id - a.id); });
+    $("movCount").textContent = lista.length ? lista.length + (lista.length === 1 ? " registro" : " registros") : "";
+    if (!lista.length){
+      $("movList").innerHTML = '<div class="empty">Todavía no registras nada en este periodo.<br/>Agrega tu primer gasto o ingreso extra.</div>';
+    } else {
+      $("movList").innerHTML = lista.map(function(m){
+        var f = parseFecha(m.fecha);
+        var fechaTxt = f.getDate() + " de " + MESES[f.getMonth()];
+        var badge = state.conectado
+          ? (m.synced ? '<span class="badge sync">EN TU HOJA</span>' : '<span class="badge pend">PENDIENTE</span>')
+          : "";
+        var sub = (m.tipo === "Ingreso extra" ? m.categoria + (m.metodo ? " · " + m.metodo : "") : m.categoria) +
+                  " · " + fechaTxt + (m.nota && m.tipo === "Ingreso extra" ? "" : "");
+        var notaTxt = m.nota ? ' · ' + escapeHtml(m.nota) : "";
+        return '<div class="mov"><span class="dot ' + (m.tipo === "Gasto" ? "gasto" : "extra") + '"></span>' +
+          '<div class="main"><div class="t">' + escapeHtml(tituloMov(m)) + ' ' + badge + '</div>' +
+          '<div class="s">' + escapeHtml(sub) + notaTxt + '</div></div>' +
+          '<div class="amt mono ' + (m.tipo === "Gasto" ? "neg" : "pos") + '">' + (m.tipo === "Gasto" ? "−" : "+") + fmt(m.monto) + '</div>' +
+          '<button class="del" type="button" data-del="' + m.id + '" aria-label="Quitar de la app">×</button></div>';
+      }).join("");
+    }
+    var pend = state.movimientos.filter(function(m){ return !m.synced; }).length;
+    $("movNote").textContent = state.conectado
+      ? (pend ? pend + " movimiento(s) sin enviar. Usa «Enviar pendientes a la hoja»." : "Todo está sincronizado con tu hoja.")
+      : "Sin conexión, los movimientos viven en la app mientras está abierta. Conéctala arriba para que queden guardados en tu hoja de Google, o descárgalos en CSV.";
+  }
+  function tituloMov(m){
+    if (m.tipo === "Ingreso extra") return m.nota ? m.nota : m.categoria;
+    return m.nota ? m.nota : m.categoria;
+  }
+  function escapeHtml(s){
+    return String(s).replace(/[&<>"']/g, function(c){
+      return { "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;" }[c];
+    });
+  }
+
+  /* ================= Formulario ================= */
+  function llenarCategorias(){
+    var sel = $("fCat");
+    if (state.tipo === "Gasto"){
+      sel.innerHTML = GASTOS.map(function(c){ return '<option>' + c.nombre + '</option>'; }).join("") + '<option>Otro</option>';
+      $("metodoWrap").style.display = "none";
+      $("btnAdd").textContent = "Agregar gasto";
+    } else {
+      sel.innerHTML = CATS_EXTRA.map(function(c){ return '<option>' + c + '</option>'; }).join("");
+      $("metodoWrap").style.display = "";
+      $("btnAdd").textContent = "Agregar ingreso extra";
+    }
+  }
+  $("tipoGasto").addEventListener("click", function(){
+    state.tipo = "Gasto";
+    $("tipoGasto").className = "on-gasto"; $("tipoExtra").className = "";
+    llenarCategorias();
+  });
+  $("tipoExtra").addEventListener("click", function(){
+    state.tipo = "Ingreso extra";
+    $("tipoExtra").className = "on-extra"; $("tipoGasto").className = "";
+    llenarCategorias();
+  });
+
+  $("btnAdd").addEventListener("click", function(){
+    var monto = parseFloat($("fMonto").value);
+    var fecha = $("fFecha").value || hoyStr();
+    var msg = $("addMsg");
+    if (!monto || monto <= 0){ msg.className = "msg err"; msg.textContent = "Pon un monto mayor a cero."; return; }
+    var mov = {
+      id: state.seq++, fecha: fecha, tipo: state.tipo,
+      categoria: $("fCat").value, monto: monto,
+      nota: $("fNota").value.trim(),
+      metodo: state.tipo === "Ingreso extra" ? $("fMetodo").value : "",
+      synced: false
+    };
+    state.movimientos.push(mov);
+    $("fMonto").value = ""; $("fNota").value = "";
+    render();
+    if (state.conectado && state.url){
+      msg.className = "msg info"; msg.textContent = "Registrado. Enviando a tu hoja…";
+      enviarMovimiento(mov).then(function(ok){
+        msg.className = "msg " + (ok ? "ok" : "err");
+        msg.textContent = ok ? "Registrado y guardado en tu hoja de Google." : "Registrado en la app, pero no se pudo enviar. Queda como pendiente.";
+        render();
+      });
+    } else {
+      msg.className = "msg ok";
+      msg.textContent = state.tipo === "Gasto" ? "Gasto registrado." : "Ingreso extra registrado. Suma a tu disponible de este periodo.";
+    }
+  });
+
+  $("movList").addEventListener("click", function(ev){
+    var id = ev.target.getAttribute && ev.target.getAttribute("data-del");
+    if (!id) return;
+    state.movimientos = state.movimientos.filter(function(m){ return m.id !== +id; });
+    render();
+  });
+
+  /* ================= Vista quincena / mes ================= */
+  $("segQ").addEventListener("click", function(){ state.vista = "quincena"; $("segQ").className = "on"; $("segM").className = ""; render(); });
+  $("segM").addEventListener("click", function(){ state.vista = "mes"; $("segM").className = "on"; $("segQ").className = ""; render(); });
+
+  /* ================= Conexión con Google Sheets ================= */
+  function setConn(ok, texto){
+    state.conectado = ok;
+    $("connState").className = "conn-state" + (ok ? " on" : "");
+    $("connStateTxt").textContent = texto;
+  }
+  function connMsg(tipo, texto){ var m = $("connMsg"); m.className = "msg " + tipo; m.textContent = texto; }
+  function leerUrl(){
+    state.url = $("fUrl").value.trim();
+    return state.url;
+  }
+  function enviarMovimiento(mov){
+    return fetch(state.url, {
+      method: "POST",
+      headers: { "Content-Type": "text/plain;charset=utf-8" },
+      body: JSON.stringify({ fecha: mov.fecha, tipo: mov.tipo, categoria: mov.categoria, monto: mov.monto, nota: mov.nota, metodo: mov.metodo })
+    }).then(function(r){ return r.json(); }).then(function(j){
+      if (j && j.ok){ mov.synced = true; return true; }
+      return false;
+    }).catch(function(){ return false; });
+  }
+
+  $("btnTest").addEventListener("click", function(){
+    var url = leerUrl();
+    if (!url){ connMsg("err", "Primero pega la URL de tu Web App (termina en /exec)."); return; }
+    connMsg("info", "Probando conexión con tu hoja…");
+    fetch(url).then(function(r){ return r.json(); }).then(function(j){
+      if (j && j.ok){
+        setConn(true, "Conectada a tu hoja de Google");
+        connMsg("ok", "Conexión lista. Tu hoja reporta: ingreso mensual " + fmt(j.ingresoMensual || 0) +
+          ", gastos " + fmt(j.totalGastos || 0) + ", asignado " + fmt(j.totalAsignado || 0) +
+          ", patrimonio " + fmt(j.patrimonio || 0) + ".");
+        render();
+      } else { setConn(false, "La URL respondió, pero no es el puente esperado"); connMsg("err", "Revisa que pegaste el código puente y que la implementación es Aplicación web con acceso «Cualquier persona»."); }
+    }).catch(function(){
+      setConn(false, "Sin conectar");
+      connMsg("err", "No se pudo conectar. Revisa la URL y que la Web App esté implementada con acceso «Cualquier persona».");
+    });
+  });
+
+  $("btnPull").addEventListener("click", function(){
+    var url = leerUrl();
+    if (!url){ connMsg("err", "Primero pega la URL de tu Web App."); return; }
+    connMsg("info", "Trayendo movimientos de tu hoja…");
+    fetch(url).then(function(r){ return r.json(); }).then(function(j){
+      if (!j || !j.ok){ connMsg("err", "La hoja no devolvió datos. Prueba primero la conexión."); return; }
+      setConn(true, "Conectada a tu hoja de Google");
+      var traidos = 0;
+      (j.movimientos || []).forEach(function(r){
+        var existe = state.movimientos.some(function(m){
+          return m.fecha === r.fecha && m.categoria === r.categoria && m.monto === r.monto && m.tipo === "Gasto";
+        });
+        if (!existe){
+          state.movimientos.push({ id: state.seq++, fecha: r.fecha, tipo: "Gasto", categoria: r.categoria, monto: r.monto, nota: r.nota || "", metodo: "", synced: true });
+          traidos++;
+        }
+      });
+      connMsg("ok", "Listo: " + traidos + " movimiento(s) nuevos traídos desde la hoja Movimientos.");
+      render();
+    }).catch(function(){ connMsg("err", "No se pudieron traer los datos. Revisa la conexión."); });
+  });
+
+  $("btnPush").addEventListener("click", function(){
+    var url = leerUrl();
+    if (!url){ connMsg("err", "Primero pega la URL de tu Web App."); return; }
+    var pend = state.movimientos.filter(function(m){ return !m.synced; });
+    if (!pend.length){ connMsg("info", "No hay movimientos pendientes de enviar."); return; }
+    connMsg("info", "Enviando " + pend.length + " movimiento(s) a tu hoja…");
+    var cadena = Promise.resolve(), enviados = 0;
+    pend.forEach(function(mov){
+      cadena = cadena.then(function(){ return enviarMovimiento(mov).then(function(ok){ if (ok) enviados++; }); });
+    });
+    cadena.then(function(){
+      setConn(true, "Conectada a tu hoja de Google");
+      connMsg(enviados === pend.length ? "ok" : "err",
+        enviados === pend.length ? "Todos los movimientos ya están en tu hoja."
+                                 : "Se enviaron " + enviados + " de " + pend.length + ". Revisa la conexión e inténtalo de nuevo.");
+      render();
+    });
+  });
+
+  $("btnCsv").addEventListener("click", function(){
+    if (!state.movimientos.length){ connMsg("info", "Todavía no hay movimientos para descargar."); return; }
+    var filas = [["Fecha","Tipo","Categoría","Monto","Nota","Método"]];
+    state.movimientos.forEach(function(m){ filas.push([m.fecha, m.tipo, m.categoria, m.monto, m.nota, m.metodo]); });
+    var csv = filas.map(function(f){
+      return f.map(function(c){ return '"' + String(c == null ? "" : c).replace(/"/g, '""') + '"'; }).join(",");
+    }).join("\n");
+    var a = document.createElement("a");
+    a.href = URL.createObjectURL(new Blob(["\ufeff" + csv], { type: "text/csv;charset=utf-8" }));
+    a.download = "movimientos-presupuesto-solo.csv";
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    connMsg("ok", "CSV descargado. Puedes pegarlo en tu hoja Movimientos o Ingresos Extra.");
+  });
+
+  $("btnCopyCode").addEventListener("click", function(){
+    var txt = $("bridgeCode").textContent;
+    var done = function(){ $("copyMsg").textContent = "Código copiado. Pégalo en Apps Script."; };
+    if (navigator.clipboard && navigator.clipboard.writeText){
+      navigator.clipboard.writeText(txt).then(done).catch(function(){ fallbackCopy(txt); done(); });
+    } else { fallbackCopy(txt); done(); }
+  });
+  function fallbackCopy(txt){
+    var ta = document.createElement("textarea");
+    ta.value = txt; document.body.appendChild(ta); ta.select();
+    try { document.execCommand("copy"); } catch(e){}
+    document.body.removeChild(ta);
+  }
+
+  /* ================= Inicio ================= */
+  $("fFecha").value = hoyStr();
+  llenarCategorias();
+  render();
+})();
+</script>
+</body>
+</html>
